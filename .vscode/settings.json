@@ -124,6 +124,21 @@
     "set": "cpp",
     "valarray": "cpp",
     "variant": "cpp",
-    "fstream": "cpp"
-  }
+    "fstream": "cpp",
+    "xstring": "cpp",
+    "ios": "cpp",
+    "xfacet": "cpp",
+    "xiosbase": "cpp",
+    "xlocale": "cpp",
+    "xlocinfo": "cpp",
+    "xlocnum": "cpp",
+    "xmemory": "cpp",
+    "xstddef": "cpp",
+    "xtr1common": "cpp",
+    "xutility": "cpp"
+  },
+  "[powershell]": {
+    "files.encoding": "utf8bom",
+    "files.autoGuessEncoding": true
+  },
 }

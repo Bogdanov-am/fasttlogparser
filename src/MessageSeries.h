@@ -21,6 +21,7 @@ public:
     
 private:
     py::array getField(const mavlink_field_info_t *field_info);
+    py::array getFieldChar(const mavlink_field_info_t *field_info);
 
     template <class T>
     py::array_t<T> getField(const mavlink_field_info_t *field_info);

@@ -3,12 +3,10 @@
     {
       "name": "windows-gcc-x64",
       "includePath": [
-        "${workspaceFolder}/**",
-        "C:/projects/mavlink/out",
-        "C:/Users/bogda/AppData/Local/Programs/Python/Python311/include/**",
-        "C:/Users/bogda/AppData/Local/Programs/Python/Python311/Lib/site-packages/pybind11/include/**"
+        "${workspaceFolder}/src/**",
+        "${workspaceFolder}/thirdparty/c_library_v2/**",
+        "${workspaceFolder}/thirdparty/pybind11/include/**"
       ],
-      "compilerPath": "C:/Qt/Tools/mingw1120_64/bin/gcc.exe",
       "cStandard": "${default}",
       "cppStandard": "${default}",
       "intelliSenseMode": "windows-gcc-x64",
