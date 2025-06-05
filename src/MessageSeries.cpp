@@ -27,17 +27,16 @@ inline py::array_t<typename Sequence::value_type> as_pyarray(Sequence &&seq)
     return as_pyarray(std::move(seq), 1);
 }
 
-MessageSeries::MessageSeries(const mavlink_message_info_t *info, const char *data) : info(info), data(data)
+MessageSeries::MessageSeries(const mavlink_message_info_t *info) : _info(info)
 {
 }
 
-MessageSeries::~MessageSeries()
+void MessageSeries::addMsg(uint64_t timestamp, const mavlink_message_t* msg)
 {
-}
-
-void MessageSeries::addOffsets(uint64_t offset)
-{
-    msg_offsets.push_back(offset);
+    _timestamps.push_back(double(timestamp) / 1e6);
+    mavlink_message_t cp_msg;
+    memcpy(&cp_msg, msg, sizeof(mavlink_message_t));
+    _msgs.push_back(cp_msg);
 }
 
 template <class T>
@@ -45,18 +44,11 @@ py::array_t<T> MessageSeries::getField(const mavlink_field_info_t *field_info)
 {
     unsigned int column = field_info->array_length ? field_info->array_length : 1;
     std::vector<T> v(length() * column);
-
+    T *dest = v.data();
     for (int i = 0; i < length(); ++i)
     {
-        size_t offset = msg_offsets[i];
-        auto msg = getMsgByOffset(offset);
-        auto payload = (char *)msg->payload64;
-
-        for (size_t j = 0; j < column; ++j)
-        {
-            T data = *((T *)(payload + field_info->wire_offset) + j);
-            v[i * column + j] = data;
-        }
+        auto payload = _MAV_PAYLOAD(getMsg(i));
+        memcpy(&dest[i * column], &payload[field_info->wire_offset], column * sizeof(T));
     }
 
     return as_pyarray(std::move(v), column);
@@ -69,12 +61,8 @@ py::array MessageSeries::getFieldChar(const mavlink_field_info_t *field_info)
     char *data = new char[column * length()];
     for (int i = 0; i < length(); ++i)
     {
-        size_t offset = msg_offsets[i];
-        auto msg = getMsgByOffset(offset);
-        auto payload = (char *)msg->payload64;
-
-        char *str = payload + field_info->wire_offset;
-        std::strncpy(data + column * i, str, column);
+        auto payload = _MAV_PAYLOAD(getMsg(i));
+        std::strncpy(data + column * i, &payload[field_info->wire_offset], column);
     }
     return py::array(py::dtype("S" + std::to_string(column)), {length()}, {column}, data);
 }
@@ -112,13 +100,7 @@ py::array MessageSeries::getField(const mavlink_field_info_t *field_info)
 
 py::array MessageSeries::getTimestamps()
 {
-    std::vector<uint64_t> v(length());
-    for (int i = 0; i < length(); ++i)
-    {
-        size_t offset = msg_offsets[i];
-        v[i] = _byteswap_uint64(*(uint64_t *)(data + offset));
-    }
-    return as_pyarray(std::move(v));
+    return as_pyarray(std::move(_timestamps));
 }
 
 py::array MessageSeries::getSysIds()
@@ -126,8 +108,7 @@ py::array MessageSeries::getSysIds()
     std::vector<uint8_t> v(length());
     for (int i = 0; i < length(); ++i)
     {
-        size_t offset = msg_offsets[i];
-        v[i] = getMsgByOffset(offset)->sysid;
+        v[i] = getMsg(i)->sysid;
     }
     return as_pyarray(std::move(v));
 }
@@ -137,32 +118,41 @@ py::array MessageSeries::getCompIds()
     std::vector<uint8_t> v(length());
     for (int i = 0; i < length(); ++i)
     {
-        size_t offset = msg_offsets[i];
-        v[i] = getMsgByOffset(offset)->compid;
+        v[i] = getMsg(i)->compid;
     }
     return as_pyarray(std::move(v));
 }
 
-mavlink_message_t *MessageSeries::getMsgByOffset(uint64_t offset)
+mavlink_message_t *MessageSeries::getMsg(uint64_t index)
 {
-    return (mavlink_message_t *)(data + offset + sizeof(uint64_t) - sizeof(uint16_t) - 1);
+    return &_msgs[index];
 }
 
-std::map<std::string, py::array> MessageSeries::getFields()
+std::string get_remap_name(const std::map<std::string, std::string> &remap_field, std::string field_name)
+{
+    auto pair = remap_field.find(field_name);
+    if (pair != remap_field.end()) {
+        return pair->second;
+    } else {
+        return field_name;
+    }
+}
+
+std::map<std::string, py::array> MessageSeries::getFields(const std::map<std::string, std::string> &remap_field)
 {
     std::map<std::string, py::array> map;
     map.insert({"timestamp", getTimestamps()});
     map.insert({"sys_id", getSysIds()});
     map.insert({"cmp_id", getCompIds()});
 
-    // py::print(std::string(info->name), length());
-    for (size_t i = 0; i < info->num_fields; ++i)
+    for (size_t i = 0; i < _info->num_fields; ++i)
     {
-        const mavlink_field_info_t field_info = info->fields[i];
-        // py::print(std::string(field_info.name), py::arg("end") = " ");
-        map.insert({std::string(field_info.name), getField(&field_info)});
+        const mavlink_field_info_t field_info = _info->fields[i];
+        std::string field_name = std::string(field_info.name);
+        field_name = get_remap_name(remap_field, field_name);
+        map.insert({field_name, getField(&field_info)});
     }
-    // py::print();
-
     return map;
 }
+
+
