@@ -3,11 +3,10 @@ import pandas as pd
 from pymavlog import MavTLog
 import timeit
 
-file = "../logs/2024-09-27 10-58-56.tlog"
+file = "logs/2024-07-15 07-49-51.tlog"
 
 def parse_1():
-    log = fasttlogparser.parseTLog(file, whitelist=["HEARTBEAT"])
-    
+    log, ids = fasttlogparser.parseTLog(file, blacklist=["AUTOPILOT_VERSION","FILE_TRANSFER_PROTOCOL","HOME_POSITION"])
     sum = 0
     dfs: dict[str, pd.DataFrame] = {}
     for msg in log:
@@ -18,11 +17,9 @@ def parse_1():
     return sum
 
 def parse_2():
-    tlog = MavTLog(file, [],
-                ["HEARTBEAT"],
-                map_columns={'flags': 'flags_ekf'})
+    tlog = MavTLog(file, ["AUTOPILOT_VERSION","FILE_TRANSFER_PROTOCOL","HOME_POSITION"])
 
-    tlog.parse([])
+    tlog.parse()
     dfs: dict[str, pd.DataFrame] = {}
     sum = 0
     for type in tlog.types:
@@ -37,12 +34,12 @@ def parse_2():
         sum += df.memory_usage(index=False).sum()
     return sum
 
-result1 = timeit.timeit(parse_1, number=5)
-result2 = timeit.timeit(parse_2, number=5)
-
-print("Time coeff:", result2/result1)
-
+result1 = timeit.timeit(parse_1, number=10)
+result2 = timeit.timeit(parse_2, number=10)
 result1_mem = parse_1()
 result2_mem = parse_2()
 
-print("Memory coeff:", result2_mem/result1_mem)
+print("MavTLog - {:.5f} ms / {:.2f}KB".format(result2,result2_mem/1024))
+print("fasttlogparser - {:.5f} ms / {:.2f}KB".format(result1,result1_mem/1024))
+print("Time coeff - {:.1f}".format(result2/result1))
+print("Memory coeff - {:.1f}".format(result2_mem/result1_mem))
