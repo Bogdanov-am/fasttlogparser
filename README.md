@@ -19,7 +19,7 @@ results = fasttlogparser.parseTLog(
 ```
 
 ## ✨ Key Features  
-- **Native C++ acceleration** - 100-150x faster than pure Python parsers  
+- **Native C++ acceleration** - ~100x faster than pure Python parser
 - **Smart filtering** - by system_id/componet_id or message name whitelist/blacklist  
 - **Field remapping** - customize output schema  
 - **Zero dependencies** - lightweight Python bindings via pybind11  
@@ -49,8 +49,8 @@ results = fasttlogparser.parseTLog("long_flight.tlog", remap_field = {"alt": "al
 
 ## ⚡ Benchmark
 Processing a 252MB .tlog file:  
-- Pure Python parser: 4m 22s ⏳  
-- **fasttlogparser**: 6.7s ⚡ *(39x faster!)*  
+- Pure Python parser: 24m 56s ⏳  
+- **fasttlogparser**: 16.6s ⚡ *(90x faster!)*  
 
 ---
 ### Ready for high-performance telemetry MAVLink analysis?  

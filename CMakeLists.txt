@@ -17,5 +17,4 @@ target_compile_options(fasttlogparser PRIVATE -Wno-address-of-packed-member -Wno
 
 target_include_directories(fasttlogparser PRIVATE thirdparty/c_library_v2)
 
-
 install(TARGETS fasttlogparser DESTINATION .)

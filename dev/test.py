@@ -18,7 +18,7 @@ def parse_1():
 
 def parse_2():
     tlog = MavTLog(file, ["AUTOPILOT_VERSION","FILE_TRANSFER_PROTOCOL","HOME_POSITION"])
-
+    print('parse_2')
     tlog.parse()
     dfs: dict[str, pd.DataFrame] = {}
     sum = 0
@@ -34,12 +34,12 @@ def parse_2():
         sum += df.memory_usage(index=False).sum()
     return sum
 
-result1 = timeit.timeit(parse_1, number=10)
-result2 = timeit.timeit(parse_2, number=10)
+result1 = timeit.timeit(parse_1, number=5)
+result2 = timeit.timeit(parse_2, number=5)
 result1_mem = parse_1()
 result2_mem = parse_2()
 
-print("MavTLog - {:.5f} ms / {:.2f}KB".format(result2,result2_mem/1024))
-print("fasttlogparser - {:.5f} ms / {:.2f}KB".format(result1,result1_mem/1024))
+print("MavTLog - {:.5f}s / {:.2f}KB".format(result2,result2_mem/1024/1024))
+print("fasttlogparser - {:.5f}s / {:.2f}KB".format(result1,result1_mem/1024/1024))
 print("Time coeff - {:.1f}".format(result2/result1))
 print("Memory coeff - {:.1f}".format(result2_mem/result1_mem))
