@@ -26,7 +26,7 @@ results = fasttlogparser.parseTLog(
 
 ## ⚙️ Installation  
 ```bash
-pip install .
+pip install fasttlogparser
 ```
 
 ## 🔧 Advanced Usage  

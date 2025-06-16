@@ -12,8 +12,10 @@ pybind11_add_module(fasttlogparser
     src/module.cpp
     src/MessageSeries.cpp)
 
-    
-target_compile_options(fasttlogparser PRIVATE -Wno-address-of-packed-member -Wno-cast-align)
+
+if (NOT WIN32)  
+    target_compile_options(fasttlogparser PRIVATE -Wno-address-of-packed-member -Wno-cast-align)  
+endif()
 
 target_include_directories(fasttlogparser PRIVATE thirdparty/c_library_v2)
 

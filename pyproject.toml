@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "fasttlogparser"
-version = "1.0.1"
+version = "1.0.2"
 authors = [
   { name="Anton Bogdanov", email="bogdan0v.am@yandex.ru" },
 ]
