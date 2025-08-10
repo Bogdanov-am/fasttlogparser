@@ -3,7 +3,7 @@
 #include <pybind11/stl.h>
 
 #define MAVLINK_USE_MESSAGE_INFO
-#include <ardupilotmega/mavlink.h>
+#include <mavlink.h>
 #include <mavlink_helpers.h>
 
 namespace py = pybind11;

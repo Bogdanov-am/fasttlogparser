@@ -5,7 +5,7 @@
 #include <fstream>
 
 #define MAVLINK_USE_MESSAGE_INFO
-#include <ardupilotmega/mavlink.h>
+#include <mavlink.h>
 #include <mavlink_helpers.h>
 
 #include "MessageSeries.h"

@@ -2,6 +2,6 @@
 	path = thirdparty/pybind11
 	url = ../../pybind/pybind11
 	branch = stable
-[submodule "thirdparty/c_library_v2"]
-	path = thirdparty/c_library_v2
-	url = https://github.com/mavlink/c_library_v2
+[submodule "thirdparty/mavlink"]
+	path = thirdparty/mavlink
+	url = https://github.com/mavlink/mavlink
