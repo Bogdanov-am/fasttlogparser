@@ -24,6 +24,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - uses: actions/setup-python@v5
         with:
@@ -32,7 +34,7 @@ jobs:
       - name: Build release distributions
         run: |
           git submodule update --init 
-          python -m pip install build auditwheel
+          python -m pip install build auditwheel 
           python -m build
           python -m auditwheel repair dist/*.whl -w dist
           rm dist/*-linux_x86*.whl
@@ -51,6 +53,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - uses: actions/setup-python@v5
         with:

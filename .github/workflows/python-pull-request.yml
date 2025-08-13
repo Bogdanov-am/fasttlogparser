@@ -1,0 +1,40 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.13
+
+      - name: Build distributions
+        run: |
+          git submodule update --init 
+          python -m pip install build auditwheel scikit-build-core pybind11
+          python -m build --no-isolation --wheel
+  
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.13
+
+      - name: Build distributions
+        run: |
+          git submodule update --init 
+          python -m pip install build scikit-build-core pybind11
+          python -m build --no-isolation --wheel

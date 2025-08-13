@@ -13,13 +13,14 @@ pybind11_add_module(fasttlogparser
     src/MessageSeries.cpp)
 
 add_subdirectory (thirdparty/mavlink)
-set(MAVLINK_DIALECT     common)
+set(MAVLINK_DIALECT common)
+add_dependencies(fasttlogparser mavlink)
 
-target_link_libraries(fasttlogparser PRIVATE mavlink)
+target_include_directories(fasttlogparser PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/mavlink/include/mavlink/${MAVLINK_DIALECT})
+target_include_directories(fasttlogparser PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/mavlink/include/mavlink)
 
 if (NOT WIN32)  
     target_compile_options(fasttlogparser PRIVATE -Wno-address-of-packed-member -Wno-cast-align)  
 endif()
-
 
 install(TARGETS fasttlogparser DESTINATION .)
