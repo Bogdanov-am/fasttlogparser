@@ -7,15 +7,16 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(Python 3.10 COMPONENTS Interpreter Development REQUIRED)
 
+#pybind11 lib
 add_subdirectory (thirdparty/pybind11)
 pybind11_add_module(fasttlogparser 
     src/module.cpp
     src/MessageSeries.cpp)
 
+#mavlink lib
+set(MAVLINK_DIALECT ardupilotmega)
 add_subdirectory (thirdparty/mavlink)
-set(MAVLINK_DIALECT common)
 add_dependencies(fasttlogparser mavlink)
-
 target_include_directories(fasttlogparser PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/mavlink/include/mavlink/${MAVLINK_DIALECT})
 target_include_directories(fasttlogparser PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/mavlink/include/mavlink)
 
