@@ -108,6 +108,5 @@ jobs:
 
       - name: Run tests
         run: |
-          git lfs fetch
           pip install pytest pytest-cov numpy
           pytest tests/
