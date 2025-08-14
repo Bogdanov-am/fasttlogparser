@@ -1,0 +1,110 @@
+name: Test
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - main
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: read
+      # To report GitHub Actions status checks
+      statuses: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # super-linter needs the full git history to get the
+          # list of files that changed across commits
+          fetch-depth: 0
+
+      - name: Super-linter
+        uses: super-linter/super-linter@v8.0.0 # x-release-please-version
+        env:
+          # To report GitHub Actions status checks
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Disable specific linters that are noisy for this repo
+          VALIDATE_PYTHON_FLAKE8: false
+          VALIDATE_PYTHON_ISORT: false
+          VALIDATE_CLANG_FORMAT: false
+          VALIDATE_JSCPD: false
+
+  coverage:
+    name: Coverage build and test
+    needs: lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.13
+
+      - name: Install deps and build
+        run: |
+          pip install build auditwheel scikit-build-core pybind11 pytest numpy
+          CMAKE_ARGS="-DENABLE_COVERAGE=ON" pip install -v -e . --no-build-isolation -Cbuild-dir=build
+
+      - name: Run tests with coverage
+        run: |
+          pytest tests/
+          sudo apt install lcov
+          lcov --capture --directory build --output-file coverage.info --ignore-errors mismatch
+          lcov --remove coverage.info '/usr/*' '*/pybind11/*' '*/mavlink/*' --output-file coverage_filtered.info
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage_filtered.info
+          fail_ci_if_error: true
+
+  test:
+    name: Tests
+    needs: coverage
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.10", "3.11", "3.12", "3.13"] # Параметры для перебора
+      fail-fast: false
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Python setup and build package
+        uses: ./.github/actions/build-package
+        with:
+          python-version: ${{ matrix.python }}
+          cache-dependency-path: pyproject.toml
+
+      - name: Install built package
+        shell: bash
+        run: pip install dist/*.whl
+
+      - name: Run tests
+        run: |
+          pip install pytest pytest-cov numpy
+          pytest tests/ --cov --cov-branch --cov-report=xml

@@ -16,67 +16,36 @@ permissions:
   contents: read
 
 jobs:
-  release-build-linux:
-    runs-on: ubuntu-latest
+  release-build:
     strategy:
       matrix:
-        python: ["3.10","3.11", "3.12", "3.13"]  # Параметры для перебора
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.10", "3.11", "3.12", "3.13"] # Параметры для перебора
+
+    runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - uses: actions/setup-python@v5
+      - name: Python setup and build package
+        uses: ./.github/actions/build-package
         with:
           python-version: ${{ matrix.python }}
+          cache-dependency-path: pyproject.toml
 
-      - name: Build release distributions
+      - name: Clean release distributions for linux
+        if: matrix.os == 'ubuntu-latest'
         run: |
-          git submodule update --init 
-          python -m pip install build auditwheel 
-          python -m build
           python -m auditwheel repair dist/*.whl -w dist
           rm dist/*-linux_x86*.whl
 
       - name: Upload distributions
         uses: actions/upload-artifact@v4
         with:
-          name: release-linux-${{ matrix.python }}
-          path: dist/
-  
-  release-build-windows:
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        python: ["3.10","3.11", "3.12", "3.13"]  # Параметры для перебора
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python }}
-
-      - name: Build release distributions
-        run: |
-          git submodule update --init 
-          python -m pip install build
-          python -m build
-
-      - name: Upload distributions
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-windows-${{ matrix.python }}
+          name: release-${{ matrix.os }}-${{ matrix.python }}
           path: dist/
 
   pypi-publish:
     runs-on: ubuntu-latest
-    needs:
-      - release-build-linux
-      - release-build-windows
+    needs: release-build
     permissions:
       # IMPORTANT: this permission is mandatory for trusted publishing
       id-token: write
