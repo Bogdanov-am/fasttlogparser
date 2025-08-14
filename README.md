@@ -1,5 +1,9 @@
 # ⚡ fasttlogparser - Blazing-Fast MAVLink .tlog Parser
 
+[![codecov](https://codecov.io/gh/Bogdanov-am/fasttlogparser/graph/badge.svg?token=UNPLPI04DR)](https://codecov.io/gh/Bogdanov-am/fasttlogparser)
+![test](https://github.com/Bogdanov-am/fasttlogparser/actions/workflows/python-test.yml/badge.svg)
+[![PyPI version](https://badge.fury.io/py/fasttlogparser.svg)](https://badge.fury.io/py/fasttlogparser)
+
 **Unlock lightning-fast MAVLink telemetry parsing** with this Python package powered by optimized C++ backend. Extract insights from .tlog files at unparalleled speeds!
 
 ```python
