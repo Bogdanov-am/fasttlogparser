@@ -1,6 +1,6 @@
-# ⚡ fasttlogparser - Blazing-Fast MAVLink .tlog Parser  
+# ⚡ fasttlogparser - Blazing-Fast MAVLink .tlog Parser
 
-**Unlock lightning-fast MAVLink telemetry parsing** with this Python package powered by optimized C++ backend. Extract insights from .tlog files at unparalleled speeds!  
+**Unlock lightning-fast MAVLink telemetry parsing** with this Python package powered by optimized C++ backend. Extract insights from .tlog files at unparalleled speeds!
 
 ```python
 import fasttlogparser
@@ -18,39 +18,48 @@ results = fasttlogparser.parseTLog(
 )
 ```
 
-## ✨ Key Features  
-- **Native C++ acceleration** - ~100x faster than pure Python parser
-- **Smart filtering** - by system_id/componet_id or message name whitelist/blacklist  
-- **Field remapping** - customize output schema  
-- **Zero dependencies** - lightweight Python bindings via pybind11  
+## ✨ Key Features
 
-## ⚙️ Installation  
+- **Native C++ acceleration** - ~100x faster than pure Python parser
+- **Smart filtering** - by system_id/componet_id or message name whitelist/blacklist
+- **Field remapping** - customize output schema
+- **Zero dependencies** - lightweight Python bindings via pybind11
+
+## ⚙️ Installation
+
 ```bash
 pip install fasttlogparser
 ```
 
-## 🔧 Advanced Usage  
-Filter messages using MAVLink IDs:  
+## 🔧 Advanced Usage
+
+Filter messages using MAVLink IDs:
+
 ```python
 # Get only GPS_RAW_INT and ATTITUDE messages
 messages = fasttlogparser.parseTLog("data.tlog", whitelist=["GPS_RAW_INT", "ATTITUDE"])
 ```
 
-Filter messages using system and component ids:  
+Filter messages using system and component IDs:
+
 ```python
 # Keep only (2,1) - (sysId, cmpId)
 results = fasttlogparser.parseTLog("long_flight.tlog", ids = [(2,1)])
 ```
 
-Rename individual message fields:  
+Rename individual message fields:
+
 ```python
 results = fasttlogparser.parseTLog("long_flight.tlog", remap_field = {"alt": "altitude"})
 ```
 
 ## ⚡ Benchmark
-Processing a 252MB .tlog file:  
-- Pure Python parser: 24m 56s ⏳  
-- **fasttlogparser**: 16.6s ⚡ *(90x faster!)*  
+
+Processing a 252MB .tlog file:
+
+- Pure Python parser: 24m 56s ⏳
+- **fasttlogparser**: 16.6s ⚡ _(90x faster!)_
 
 ---
-### Ready for high-performance telemetry MAVLink analysis?  
+
+### Ready for high-performance telemetry MAVLink analysis?

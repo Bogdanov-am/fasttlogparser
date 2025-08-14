@@ -5,13 +5,22 @@ set(CMAKE_CXX_STANDARD 17 CACHE STRING "C++ version selection")
 set(CMAKE_CXX_STANDARD_REQUIRED ON) 
 set(CMAKE_CXX_EXTENSIONS OFF) 
 
-find_package(Python 3.10 COMPONENTS Interpreter Development REQUIRED)
+find_package(Python COMPONENTS Interpreter Development REQUIRED)
+
+option(ENABLE_COVERAGE "Enable coverage reporting" OFF)
+
+if(ENABLE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    message(STATUS "Coverage build enabled")
+    add_compile_options(--coverage -O0 -g)
+    add_link_options(--coverage)
+endif()
 
 #pybind11 lib
 add_subdirectory (thirdparty/pybind11)
 pybind11_add_module(fasttlogparser 
-    src/module.cpp
+    src/fasttlogparser.cpp
     src/MessageSeries.cpp)
+target_include_directories(fasttlogparser PRIVATE src)
 
 #mavlink lib
 set(MAVLINK_DIALECT ardupilotmega)
