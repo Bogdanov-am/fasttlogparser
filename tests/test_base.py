@@ -10,7 +10,19 @@ import numpy
 import pytest
 import fasttlogparser
 
-FILE = "dev/flightlog.tlog"
+FILE_1 = "dev/flightlog.tlog"
+FILE_2 = "dev/bigtlog.tlog"
+
+
+@pytest.fixture(name="tlog_file", params=[FILE_1, FILE_2])
+def setup_tlog_file(request):
+    """Parametrized fixture that yields sample tlog file paths.
+
+    The fixture is parametrized with `FILE_1` and `FILE_2`. Tests that use
+    the `tlog_files` fixture will receive the currently selected file path
+    (a string) via `request.param`.
+    """
+    return request.param
 
 
 @pytest.fixture(name="tmp_tlog_file")
@@ -28,59 +40,61 @@ def setup_tmp_tlog_file(tmp_path):
     return tlog
 
 
-def test_parse_basic():
+def test_parse_basic(tlog_file):
     """
     Basic parsing should succeed and return the expected container types and
     field array types for a known message (ATTITUDE).
     """
-    messages, msg_ids = fasttlogparser.parseTLog(FILE)
+    messages, msg_ids = fasttlogparser.parseTLog(tlog_file)
     assert isinstance(messages, dict)
     assert isinstance(msg_ids, dict)
     assert isinstance(messages["ATTITUDE"], dict)
     assert isinstance(messages["ATTITUDE"]["pitch"], numpy.ndarray)
 
 
-def test_parse_with_ids():
+def test_parse_with_ids(tlog_file):
     """
     Ensure parsing with specific (system,component) ID filters returns only
     messages matching those IDs and that msg_ids is populated accordingly.
     """
-    messages, msg_ids = fasttlogparser.parseTLog(FILE, ids=[(5, 1)])
+    _, msg_ids = fasttlogparser.parseTLog(tlog_file)
+    sys_ids = list(msg_ids.keys())
+    sys_comp = (sys_ids[0], list(msg_ids[sys_ids[0]])[0])
+    messages, msg_ids = fasttlogparser.parseTLog(tlog_file, ids=[sys_comp])
     assert len(messages["ATTITUDE"]["pitch"]) != 0
     assert len(messages["ATTITUDE"]["pitch"]) == len(messages["ATTITUDE"]["roll"])
-    assert len(msg_ids) == 1
 
-    messages, msg_ids = fasttlogparser.parseTLog(FILE, ids=[(1, 1)])
+    messages, msg_ids = fasttlogparser.parseTLog(tlog_file, ids=[(255, 255)])
     assert len(messages) == 0
-    assert len(msg_ids) == 1
+    assert len(msg_ids) == len(sys_ids)
 
 
-def test_parse_with_whitelist():
+def test_parse_with_whitelist(tlog_file):
     """
     Check that providing a whitelist of message names limits the parsed output
     to the allowed messages only.
     """
-    messages, _ = fasttlogparser.parseTLog(FILE, whitelist=["GPS_RAW_INT"])
+    messages, _ = fasttlogparser.parseTLog(tlog_file, whitelist=["GPS_RAW_INT"])
     assert "GPS_RAW_INT" in messages
     assert "ATTITUDE" not in messages
 
 
-def test_parse_with_blacklist():
+def test_parse_with_blacklist(tlog_file):
     """
     Check that providing a blacklist of message names excludes those messages
     from the parsed output.
     """
-    messages, _ = fasttlogparser.parseTLog(FILE, blacklist=["ATTITUDE"])
+    messages, _ = fasttlogparser.parseTLog(tlog_file, blacklist=["ATTITUDE"])
     assert "GPS_RAW_INT" in messages
     assert "ATTITUDE" not in messages
 
 
-def test_parse_with_remap():
+def test_parse_with_remap(tlog_file):
     """
     Verify that field remapping (remap_field) renames fields in the parsed
     output as expected.
     """
-    messages, _ = fasttlogparser.parseTLog(FILE, remap_field={"alt": "altitude"})
+    messages, _ = fasttlogparser.parseTLog(tlog_file, remap_field={"alt": "altitude"})
     assert "altitude" in messages["GPS_RAW_INT"]
     assert "alt" not in messages["GPS_RAW_INT"]
 

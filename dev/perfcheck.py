@@ -11,7 +11,7 @@ from pymavlog import MavTLog
 import fasttlogparser
 
 
-FILE = "dev/flightlog.tlog"
+FILE = "dev/bigtlog.tlog"
 
 
 def parse_1():
