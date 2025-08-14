@@ -7,12 +7,12 @@ coverage:
     project:
       default:
         target: 80%
-        threshold: 1
+        threshold: "1"
     patch:
       default:
         target: 80%
-        threshold: 1
+        threshold: "1"
 
 comment:
-  layout: "reach, diff, flags, files, summary"
+  layout: "reach, diff, flags, files"
   behavior: default
