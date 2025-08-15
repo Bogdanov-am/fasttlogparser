@@ -24,7 +24,7 @@ target_include_directories(fasttlogparser PRIVATE src)
 
 #mavlink lib
 set(MAVLINK_DIALECT ardupilotmega)
-add_subdirectory (thirdparty/mavlink)
+add_subdirectory (thirdparty/mavlink EXCLUDE_FROM_ALL)
 add_dependencies(fasttlogparser mavlink)
 target_include_directories(fasttlogparser PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/mavlink/include/mavlink/${MAVLINK_DIALECT})
 target_include_directories(fasttlogparser PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/mavlink/include/mavlink)
@@ -33,4 +33,8 @@ if (NOT WIN32)
     target_compile_options(fasttlogparser PRIVATE -Wno-address-of-packed-member -Wno-cast-align)  
 endif()
 
-install(TARGETS fasttlogparser DESTINATION .)
+install(TARGETS fasttlogparser DESTINATION fasttlogparser)
+install(FILES  
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/__init__.py
+    # ${CMAKE_CURRENT_SOURCE_DIR}/src/fasttlogparser.pyi 
+    DESTINATION fasttlogparser)
