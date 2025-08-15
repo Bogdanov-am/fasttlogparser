@@ -25,6 +25,11 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
       - name: Python setup and build package
         uses: ./.github/actions/build-package
         with:
