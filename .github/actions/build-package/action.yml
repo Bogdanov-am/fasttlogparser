@@ -31,5 +31,5 @@ runs:
       shell: bash
 
     - name: Build distributions
-      run: python -m build -s -w --no-isolation
+      run: python -m build --no-isolation
       shell: bash
