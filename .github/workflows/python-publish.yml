@@ -36,7 +36,7 @@ jobs:
           python-version: ${{ matrix.python }}
           cache-dependency-path: pyproject.toml
 
-      - name: Clean sdist distributions 
+      - name: Clean sdist distributions
         if: matrix.os != 'windows-latest' && matrix.python != '3.13'
         run: rm dist/*.tar.gz
 
