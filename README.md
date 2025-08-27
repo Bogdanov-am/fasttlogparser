@@ -32,7 +32,7 @@ results = fasttlogparser.parseTLog(
 ## ⚙️ Installation
 
 ```bash
-pip install fasttlogparser
+pip install fasttlogparser --no-build-isolation
 ```
 
 ## 🔧 Advanced Usage
