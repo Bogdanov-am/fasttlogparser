@@ -21,3 +21,6 @@ license-files = ["LICEN[CS]E*"]
 [project.urls]
 Homepage = "https://github.com/Bogdanov-am/fasttlogparser"
 Issues = "https://github.com/Bogdanov-am/fasttlogparser/issues"
+
+[tool.scikit-build]
+sdist.include = ["thirdparty/mavlink/pymavlink/generator/C/**/*"]
