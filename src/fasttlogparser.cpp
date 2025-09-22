@@ -117,14 +117,14 @@ parseTLog(const std::string &path, std::optional<std::vector<MavId>> ids_opt,
   std::map<std::string, std::shared_ptr<MessageSeries>> series_map;
   MavIds found_ids;
 
-  mavlink_status_t status;
+  mavlink_status_t status = {0};
   mavlink_message_t msg;
   int chan = MAVLINK_COMM_0;
   uint64_t timestamp = 0;
 
   for (size_t i = sizeof(uint64_t); i < data.size(); ++i) {
     uint8_t byte = data[i];
-    uint8_t framing_result = mavlink_parse_char(chan, byte, &msg, &status);
+    uint8_t framing_result = mavlink_frame_char(chan, byte, &msg, &status);
 
     if (status.parse_state == MAVLINK_PARSE_STATE_GOT_STX) {
       timestamp = swapThis(
@@ -155,6 +155,10 @@ parseTLog(const std::string &path, std::optional<std::vector<MavId>> ids_opt,
         series->addMsg(timestamp, &msg);
         series_map.insert({msg_name, series});
       }
+    } else if (framing_result == MAVLINK_FRAMING_BAD_CRC) {
+      py::print("BAD_CRC: msg id", static_cast<int>(msg.msgid));
+    } else if (framing_result == MAVLINK_FRAMING_BAD_SIGNATURE) {
+      py::print("BAD_SIGNATURE: msg id", static_cast<int>(msg.msgid));
     }
   }
 
