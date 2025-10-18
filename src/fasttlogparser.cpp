@@ -17,7 +17,11 @@
 #include <string>
 #include <utility>
 #include <vector>
-
+#include <filesystem>  // NOLINT(build/c++17)
+#if defined(_MSC_VER)
+  #include <locale>
+  #include <codecvt>
+#endif
 #include <MessageSeries.h>
 
 
@@ -31,13 +35,21 @@ uint64_t swapThis(uint64_t value) {
 
 namespace py = pybind11;
 
-std::vector<char> readFile(const std::string &path) {
-  std::ifstream file(path, std::ios::binary | std::ios::ate);
-  std::streamsize size = file.tellg();
-  if (size == -1) {
-    throw std::runtime_error("File not found! " + path);
+std::vector<char> readFile(const std::string &utf8_path) {
+#if defined(_MSC_VER)
+  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+  std::wstring wide_path = converter.from_bytes(utf8_path);
+#else
+  std::string wide_path = utf8_path;
+#endif
+
+  std::error_code ec;
+  auto size = std::filesystem::file_size(wide_path, ec);
+  if (ec) {
+    throw std::runtime_error("Error getting file size!");
   }
-  file.seekg(0, std::ios::beg);
+
+  std::ifstream file(wide_path, std::ios::binary | std::ios::in);
   std::vector<char> buffer(size);
   if (file.read(buffer.data(), size)) {
     return buffer;
